@@ -80,7 +80,7 @@ const LayerImpl = Effect.gen(function* () {
     sessionId: string;
   }) => {
     const { turnId, projectId, sessionId } = options;
-    const permissionMode = options.permissionMode ?? "default";
+    const permissionMode = options.permissionMode ?? "bypassPermissions";
 
     return Effect.gen(function* () {
       const claudeCodeConfig = yield* ClaudeCode.Config;

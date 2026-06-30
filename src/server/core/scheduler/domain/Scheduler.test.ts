@@ -56,7 +56,7 @@ describe("SchedulerService", () => {
         hideNoUserMessageSession: true,
         unifySameTitleSession: true,
         enterKeyBehavior: "shift-enter-send",
-        permissionMode: "default",
+        permissionMode: "bypassPermissions",
         locale: DEFAULT_LOCALE,
       }),
   } as never);
