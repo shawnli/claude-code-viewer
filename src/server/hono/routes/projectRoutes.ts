@@ -83,15 +83,33 @@ const projectRoutes = Effect.gen(function* () {
       /**
        * Sessions
        */
-      .get("/:projectId/sessions/:sessionId", async (c) => {
-        const projectId = c.req.param("projectId");
-        const sessionId = c.req.param("sessionId");
-        const response = await effectToResponse(
-          c,
-          sessionController.getSession({ projectId, sessionId }).pipe(Effect.provide(runtime)),
-        );
-        return response;
-      })
+      .get(
+        "/:projectId/sessions/:sessionId",
+        zValidator(
+          "query",
+          z.object({
+            limit: z.string().optional(),
+            offset: z.string().optional(),
+          }),
+        ),
+        async (c) => {
+          const projectId = c.req.param("projectId");
+          const sessionId = c.req.param("sessionId");
+          const { limit, offset } = c.req.valid("query");
+          const response = await effectToResponse(
+            c,
+            sessionController
+              .getSession({
+                projectId,
+                sessionId,
+                ...(limit !== undefined ? { limit: parseInt(limit, 10) } : {}),
+                ...(offset !== undefined ? { offset: parseInt(offset, 10) } : {}),
+              })
+              .pipe(Effect.provide(runtime)),
+          );
+          return response;
+        },
+      )
       .get("/:projectId/sessions/:sessionId/export", async (c) => {
         const projectId = c.req.param("projectId");
         const sessionId = c.req.param("sessionId");

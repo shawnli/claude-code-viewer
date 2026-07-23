@@ -78,14 +78,22 @@ export const latestSessionQuery = (projectId: string) =>
     },
   }) as const;
 
-export const sessionDetailQuery = (projectId: string, sessionId: string) =>
+export const sessionDetailQuery = (
+  projectId: string,
+  sessionId: string,
+  options?: { limit?: number; offset?: number },
+) =>
   ({
-    queryKey: ["projects", projectId, "sessions", sessionId],
+    queryKey: ["projects", projectId, "sessions", sessionId, options?.limit, options?.offset],
     queryFn: async () => {
       const response = await honoClient.api.projects[":projectId"].sessions[":sessionId"].$get({
         param: {
           projectId,
           sessionId,
+        },
+        query: {
+          ...(options?.limit === undefined ? {} : { limit: options.limit.toString() }),
+          ...(options?.offset === undefined ? {} : { offset: options.offset.toString() }),
         },
       });
 

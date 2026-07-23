@@ -10,6 +10,7 @@ export const envSchema = z.object({
   CCV_TERMINAL_SHELL: z.string().optional(),
   CCV_TERMINAL_UNRESTRICTED: z.string().optional(),
   CCV_TERMINAL_DISABLED: z.string().optional(),
+  SESSION_PAGE_SIZE: z.string().optional(),
 });
 
 export type EnvSchema = z.infer<typeof envSchema>;

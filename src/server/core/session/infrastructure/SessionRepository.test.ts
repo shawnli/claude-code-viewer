@@ -1,3 +1,6 @@
+import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join as pathJoin } from "node:path";
 import { SystemError } from "@effect/platform/Error";
 import { it } from "@effect/vitest";
 import { Effect, Layer, Option } from "effect";
@@ -89,9 +92,14 @@ describe("SessionRepository", () => {
   describe("getSession", () => {
     it.live("returns session details when session file exists", () =>
       Effect.gen(function* () {
-        const projectId = Buffer.from("/test/project").toString("base64url");
+        // getSession streams the session file via node:fs to count/read
+        // lines (pagination path), which bypasses the FileSystem effect
+        // layer mock. Encode projectId as a real temp dir and write the
+        // session jsonl there so decodeSessionId resolves to a real file.
+        const tmpDir = mkdtempSync(pathJoin(tmpdir(), "ccv-project-"));
+        const projectId = Buffer.from(tmpDir).toString("base64url");
         const sessionId = "test-session";
-        const sessionPath = `/test/project/${sessionId}.jsonl`;
+        const sessionPath = pathJoin(tmpDir, `${sessionId}.jsonl`);
         const mockDate = new Date("2024-01-01T00:00:00.000Z");
         const mockMeta: SessionMeta = createMockSessionMeta({
           messageCount: 3,
@@ -99,6 +107,7 @@ describe("SessionRepository", () => {
         });
 
         const mockContent = `{"type":"user","message":{"role":"user","content":"Hello"}}\n{"type":"assistant","message":{"role":"assistant","content":"Hi"}}\n{"type":"user","message":{"role":"user","content":"Test"}}`;
+        writeFileSync(sessionPath, mockContent, "utf8");
 
         const SessionMetaServiceMock = testSessionMetaServiceLayer(mockMeta);
 
@@ -139,7 +148,7 @@ describe("SessionRepository", () => {
           ),
           Effect.provide(
             testPlatformLayer({
-              claudeCodePaths: { claudeProjectsDirPath: "/test" },
+              claudeCodePaths: { claudeProjectsDirPath: tmpdir() },
             }),
           ),
         );
@@ -153,6 +162,8 @@ describe("SessionRepository", () => {
         expect(result.session.meta).toEqual(mockMeta);
         expect(result.session.conversations).toHaveLength(3);
         expect(result.session.lastModifiedAt).toEqual(mockDate);
+
+        rmSync(tmpDir, { recursive: true, force: true });
       }),
     );
 
