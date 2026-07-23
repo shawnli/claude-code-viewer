@@ -266,6 +266,20 @@ const LayerImpl = Effect.gen(function* () {
       const updatedJob: SchedulerJob = {
         ...job,
         ...updates,
+        // Preserve long-running session state on toggle/update. Without this,
+        // updates.message (e.g. from a UI toggle carrying a partial message
+        // payload) overwrites job.message entirely and wipes resume /
+        // sessionId, breaking scheduled resume of running sessions.
+        ...(updates.message
+          ? {
+              message: {
+                ...job.message,
+                ...updates.message,
+                resume: job.message.resume,
+                sessionId: job.message.sessionId,
+              },
+            }
+          : {}),
       };
 
       const updatedConfig: SchedulerConfig = {
