@@ -1,5 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
+import { useSessionPage } from "@/lib/atoms/sessionPage";
 import type { Conversation } from "@/lib/conversation-schema";
 import { sseAtom } from "@/lib/sse/store/sseAtom";
 import { createVirtualUserEntry } from "@/lib/virtual-messages/createVirtualUserEntry";
@@ -10,6 +11,8 @@ import {
 } from "@/lib/virtual-messages/virtualMessageStore";
 import { sessionDetailQuery } from "@/web/lib/api/queries";
 
+export const PAGE_SIZE = 200;
+
 const filterConversations = (
   conversations: ReadonlyArray<
     Conversation | { type: "x-error"; line: string; lineNumber: number }
@@ -18,15 +21,17 @@ const filterConversations = (
 
 export const useSessionQuery = (projectId: string, sessionId: string) => {
   const { isConnected: isSSEConnected } = useAtomValue(sseAtom);
+  const [page] = useSessionPage(sessionId);
+  const offset = Math.max(0, (page - 1) * PAGE_SIZE);
+  const options = { limit: PAGE_SIZE, offset };
 
   const query = useSuspenseQuery({
-    queryKey: sessionDetailQuery(projectId, sessionId).queryKey,
+    queryKey: sessionDetailQuery(projectId, sessionId, options).queryKey,
     queryFn: async () => {
-      const result = await sessionDetailQuery(projectId, sessionId).queryFn();
+      const result = await sessionDetailQuery(projectId, sessionId, options).queryFn();
 
       const virtualMessage = getVirtualMessage(sessionId);
 
-      // If server has no session yet, check virtual message store
       if (result.session === null) {
         if (virtualMessage) {
           const virtualEntry = createVirtualUserEntry(virtualMessage);
@@ -59,15 +64,14 @@ export const useSessionQuery = (projectId: string, sessionId: string) => {
               conversations: [virtualEntry],
               lastModifiedAt: virtualMessage.sentAt,
             },
+            total: 1,
+            hasMore: false,
           };
         }
-
         return result;
       }
 
-      // Server returned real data. If virtual message exists and real message
-      // hasn't appeared yet, append virtual entry so the user sees their message.
-      if (virtualMessage) {
+      if (virtualMessage && page === 1) {
         if (
           shouldRemoveVirtualMessage(
             filterConversations(result.session.conversations),
@@ -75,8 +79,6 @@ export const useSessionQuery = (projectId: string, sessionId: string) => {
             virtualMessage.conversationCount,
           )
         ) {
-          // For continue/resume VMs, clean up from store here since SessionsTab
-          // doesn't handle them (the session already exists in the server list).
           if (!virtualMessage.isNewSession) {
             removeVirtualMessage(sessionId);
           }
@@ -94,16 +96,9 @@ export const useSessionQuery = (projectId: string, sessionId: string) => {
 
       return result;
     },
-    // Fallback polling in case SSE connection is lost
-    // When SSE is connected, rely on SSE-triggered invalidations instead
     refetchInterval: isSSEConnected ? false : 30_000,
     refetchIntervalInBackground: false,
   });
-
-  // Virtual message cleanup is handled by session list components
-  // (SessionsTab, SessionPageMain) when the server session appears in the project list.
-  // We don't clean up here because the session detail query refreshes before the
-  // project session list, causing the virtual session to disappear from the sidebar prematurely.
 
   return query;
 };

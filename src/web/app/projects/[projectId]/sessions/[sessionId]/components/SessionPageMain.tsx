@@ -24,6 +24,7 @@ import type { CCOptionsSchema } from "@/server/core/claude-code/schema";
 import { useConfig } from "@/web/app/hooks/useConfig";
 import { getDefaultCCOptions } from "@/web/app/projects/[projectId]/components/chatForm/ccOptionsFormSchema";
 import { InlineApprovalPanel } from "@/web/components/InlineApprovalPanel";
+import { Pagination } from "@/web/components/Pagination";
 import { Badge } from "@/web/components/ui/badge";
 import { Button } from "@/web/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/web/components/ui/popover";
@@ -672,6 +673,18 @@ const SessionPageMainContent: FC<
               scrollContainerRef={scrollContainerRef}
               enableInPageSearch
             />
+            {isExistingSession && sessionData !== null && sessionData.totalPages > 1 && (
+              <div className="w-full border-t border-border/50 py-1.5 flex justify-center">
+                <Pagination
+                  currentPage={sessionData.page}
+                  totalPages={sessionData.totalPages}
+                  onPageChange={(p) => {
+                    sessionData.setPage(p);
+                    scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                />
+              </div>
+            )}
             {!isExistingSession && (
               <div className="space-y-6">
                 <div className="rounded-2xl border border-dashed border-muted-foreground/40 bg-muted/30 p-8 text-center space-y-3">
