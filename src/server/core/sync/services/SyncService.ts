@@ -305,17 +305,44 @@ const LayerImpl = Effect.gen(function* () {
           })
           .run();
 
-        // Delete old FTS entries for this session
-        rawDb.prepare("DELETE FROM session_messages_fts WHERE session_id = ?").run(sessionId);
+        // FTS 增量写入 (append-only 优化):
+        // Claude Code 的 jsonl 只 append,历史消息不改。查已存 MAX(conversation_index),
+        // 只 INSERT 大于它的新消息;避免每次都 DELETE + 3.5w 行重 INSERT (原逻辑)。
+        // 如果新 ftsEntries 数量 <= 已存 fts 行数 → 认为 session 被截断/重写 → 回落全量。
+        const existingMaxRow = rawDb
+          .prepare(
+            "SELECT MAX(CAST(conversation_index AS INTEGER)) as maxIdx, COUNT(*) as cnt FROM session_messages_fts WHERE session_id = ?",
+          )
+          .get(sessionId) as { maxIdx: number | null; cnt: number } | undefined;
+        const existingMax =
+          existingMaxRow?.maxIdx === null || existingMaxRow?.maxIdx === undefined
+            ? -1
+            : existingMaxRow.maxIdx;
+        const existingCnt = existingMaxRow?.cnt ?? 0;
+        const canIncremental =
+          existingCnt > 0 && ftsEntries.length >= existingCnt && ftsEntries.length > 0;
 
-        // Insert new FTS entries
-        for (const entry of ftsEntries) {
-          rawDb
-            .prepare(
-              `INSERT INTO session_messages_fts (session_id, project_id, role, content, conversation_index)
+        if (!canIncremental) {
+          rawDb.prepare("DELETE FROM session_messages_fts WHERE session_id = ?").run(sessionId);
+          for (const entry of ftsEntries) {
+            rawDb
+              .prepare(
+                `INSERT INTO session_messages_fts (session_id, project_id, role, content, conversation_index)
+               VALUES (?, ?, ?, ?, ?)`,
+              )
+              .run(sessionId, projectId, entry.role, entry.content, entry.index);
+          }
+        } else {
+          // append-only: 只写 index > existingMax 的部分
+          const insertStmt = rawDb.prepare(
+            `INSERT INTO session_messages_fts (session_id, project_id, role, content, conversation_index)
              VALUES (?, ?, ?, ?, ?)`,
-            )
-            .run(sessionId, projectId, entry.role, entry.content, entry.index);
+          );
+          for (const entry of ftsEntries) {
+            if (entry.index > existingMax) {
+              insertStmt.run(sessionId, projectId, entry.role, entry.content, entry.index);
+            }
+          }
         }
 
         // Update project dir_mtime_ms
