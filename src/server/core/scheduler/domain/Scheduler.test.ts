@@ -239,4 +239,89 @@ describe("SchedulerService", () => {
       expect(result._tag).toBe("SchedulerJobNotFoundError");
     }).pipe(Effect.provide(testLayer)),
   );
+  it.live("concurrent addJob calls do not lose updates (config write is serialized)", () =>
+    Effect.gen(function* () {
+      const service = yield* SchedulerService;
+
+      const makeJob = (i: number): NewSchedulerJob => ({
+        name: `Concurrent Job ${i}`,
+        schedule: {
+          type: "cron",
+          expression: "0 0 * * *",
+          concurrencyPolicy: "skip",
+        },
+        message: {
+          content: `message ${i}`,
+          projectId: "project-1",
+          sessionId: "00000000-0000-4000-8000-000000000001",
+          resume: false,
+        },
+        enabled: false,
+      });
+
+      const COUNT = 25;
+
+      // Fire all addJob calls concurrently. Each performs readConfig -> append
+      // -> writeConfig. Before the semaphore fix these interleaved and clobbered
+      // one another, so the final config held far fewer than COUNT jobs.
+      yield* Effect.all(
+        Array.from({ length: COUNT }, (_, i) => service.addJob(makeJob(i))),
+        { concurrency: "unbounded" },
+      );
+
+      const jobs = yield* service.getJobs();
+      expect(jobs.length).toBe(COUNT);
+
+      // Every distinct job name must survive (no lost writes, no duplicates).
+      const names = new Set(jobs.map((j) => j.name));
+      expect(names.size).toBe(COUNT);
+    }).pipe(Effect.provide(testLayer)),
+  );
+
+  it.live("concurrent updateJobStatus + deleteJobFromConfig stay consistent", () =>
+    Effect.gen(function* () {
+      const service = yield* SchedulerService;
+
+      const makeJob = (i: number): NewSchedulerJob => ({
+        name: `Job ${i}`,
+        schedule: {
+          type: "cron",
+          expression: "0 0 * * *",
+          concurrencyPolicy: "skip",
+        },
+        message: {
+          content: `message ${i}`,
+          projectId: "project-1",
+          sessionId: "00000000-0000-4000-8000-000000000001",
+          resume: false,
+        },
+        enabled: false,
+      });
+
+      const COUNT = 20;
+      const created = yield* Effect.all(
+        Array.from({ length: COUNT }, (_, i) => service.addJob(makeJob(i))),
+        { concurrency: 1 },
+      );
+
+      // Concurrently update half the jobs and delete the other half. Under the
+      // old lost-update bug, an update could resurrect a just-deleted job or a
+      // delete could wipe a concurrent status update.
+      yield* Effect.all(
+        created.map((job, i) =>
+          i % 2 === 0
+            ? service.updateJob(job.id, { name: `${job.name} updated` })
+            : service.deleteJob(job.id),
+        ),
+        { concurrency: "unbounded" },
+      );
+
+      const jobs = yield* service.getJobs();
+      // Exactly the even-indexed jobs remain.
+      expect(jobs.length).toBe(COUNT / 2);
+      for (const job of jobs) {
+        expect(job.name.endsWith("updated")).toBe(true);
+      }
+    }).pipe(Effect.provide(testLayer)),
+  );
 });

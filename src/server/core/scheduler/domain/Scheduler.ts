@@ -24,6 +24,11 @@ const LayerImpl = Effect.gen(function* () {
   const eventBus = yield* EventBus;
   const fibersRef = yield* Ref.make<Map<string, Fiber.RuntimeFiber<unknown, unknown>>>(new Map());
   const runningJobsRef = yield* Ref.make<Set<string>>(new Set());
+  // Serializes the read-modify-write sequences against schedules.json. Without
+  // this, two fibers (e.g. a cron job finishing updateJobStatus while a reserved
+  // job runs deleteJobFromConfig) can interleave readConfig -> modify ->
+  // writeConfig and the later write clobbers the earlier one (lost update).
+  const configLock = yield* Effect.makeSemaphore(1);
 
   const emitSchedulerJobsChanged = eventBus.emit("schedulerJobsChanged", {});
 
@@ -148,26 +153,28 @@ const LayerImpl = Effect.gen(function* () {
     });
 
   const updateJobStatus = (jobId: string, status: "success" | "failed", runAt: string) =>
-    Effect.gen(function* () {
-      const config = yield* readConfig;
-      const job = config.jobs.find((j) => j.id === jobId);
+    configLock.withPermits(1)(
+      Effect.gen(function* () {
+        const config = yield* readConfig;
+        const job = config.jobs.find((j) => j.id === jobId);
 
-      if (job === undefined) {
-        return;
-      }
+        if (job === undefined) {
+          return;
+        }
 
-      const updatedJob: SchedulerJob = {
-        ...job,
-        lastRunAt: runAt,
-        lastRunStatus: status,
-      };
+        const updatedJob: SchedulerJob = {
+          ...job,
+          lastRunAt: runAt,
+          lastRunStatus: status,
+        };
 
-      const updatedConfig: SchedulerConfig = {
-        jobs: config.jobs.map((j) => (j.id === jobId ? updatedJob : j)),
-      };
+        const updatedConfig: SchedulerConfig = {
+          jobs: config.jobs.map((j) => (j.id === jobId ? updatedJob : j)),
+        };
 
-      yield* writeConfig(updatedConfig);
-    });
+        yield* writeConfig(updatedConfig);
+      }),
+    );
 
   const stopJob = (jobId: string) =>
     Effect.gen(function* () {
@@ -217,106 +224,112 @@ const LayerImpl = Effect.gen(function* () {
     });
 
   const addJob = (newJob: NewSchedulerJob) =>
-    Effect.gen(function* () {
-      const config = yield* readConfig.pipe(
-        Effect.catchTags({
-          ConfigFileNotFoundError: () => initializeConfig.pipe(Effect.map(() => ({ jobs: [] }))),
-          ConfigParseError: () => initializeConfig.pipe(Effect.map(() => ({ jobs: [] }))),
-        }),
-      );
-      const job: SchedulerJob = {
-        ...newJob,
-        id: ulid(),
-        createdAt: new Date().toISOString(),
-        lastRunAt: null,
-        lastRunStatus: null,
-      };
+    configLock.withPermits(1)(
+      Effect.gen(function* () {
+        const config = yield* readConfig.pipe(
+          Effect.catchTags({
+            ConfigFileNotFoundError: () => initializeConfig.pipe(Effect.map(() => ({ jobs: [] }))),
+            ConfigParseError: () => initializeConfig.pipe(Effect.map(() => ({ jobs: [] }))),
+          }),
+        );
+        const job: SchedulerJob = {
+          ...newJob,
+          id: ulid(),
+          createdAt: new Date().toISOString(),
+          lastRunAt: null,
+          lastRunStatus: null,
+        };
 
-      const updatedConfig: SchedulerConfig = {
-        jobs: [...config.jobs, job],
-      };
+        const updatedConfig: SchedulerConfig = {
+          jobs: [...config.jobs, job],
+        };
 
-      yield* writeConfig(updatedConfig);
+        yield* writeConfig(updatedConfig);
 
-      if (job.enabled) {
-        yield* startJob(job);
-      }
+        if (job.enabled) {
+          yield* startJob(job);
+        }
 
-      yield* emitSchedulerJobsChanged;
+        yield* emitSchedulerJobsChanged;
 
-      return job;
-    });
+        return job;
+      }),
+    );
 
   const updateJob = (jobId: string, updates: UpdateSchedulerJob) =>
-    Effect.gen(function* () {
-      const config = yield* readConfig.pipe(
-        Effect.catchTags({
-          ConfigFileNotFoundError: () => initializeConfig.pipe(Effect.map(() => ({ jobs: [] }))),
-          ConfigParseError: () => initializeConfig.pipe(Effect.map(() => ({ jobs: [] }))),
-        }),
-      );
-      const job = config.jobs.find((j) => j.id === jobId);
+    configLock.withPermits(1)(
+      Effect.gen(function* () {
+        const config = yield* readConfig.pipe(
+          Effect.catchTags({
+            ConfigFileNotFoundError: () => initializeConfig.pipe(Effect.map(() => ({ jobs: [] }))),
+            ConfigParseError: () => initializeConfig.pipe(Effect.map(() => ({ jobs: [] }))),
+          }),
+        );
+        const job = config.jobs.find((j) => j.id === jobId);
 
-      if (job === undefined) {
-        return yield* Effect.fail(new SchedulerJobNotFoundError({ jobId }));
-      }
+        if (job === undefined) {
+          return yield* Effect.fail(new SchedulerJobNotFoundError({ jobId }));
+        }
 
-      yield* stopJob(jobId);
+        yield* stopJob(jobId);
 
-      const updatedJob: SchedulerJob = {
-        ...job,
-        ...updates,
-        // Preserve long-running session state on toggle/update. Without this,
-        // updates.message (e.g. from a UI toggle carrying a partial message
-        // payload) overwrites job.message entirely and wipes resume /
-        // sessionId, breaking scheduled resume of running sessions.
-        ...(updates.message
-          ? {
-              message: {
-                ...job.message,
-                ...updates.message,
-                resume: job.message.resume,
-                sessionId: job.message.sessionId,
-              },
-            }
-          : {}),
-      };
+        const updatedJob: SchedulerJob = {
+          ...job,
+          ...updates,
+          // Preserve long-running session state on toggle/update. Without this,
+          // updates.message (e.g. from a UI toggle carrying a partial message
+          // payload) overwrites job.message entirely and wipes resume /
+          // sessionId, breaking scheduled resume of running sessions.
+          ...(updates.message
+            ? {
+                message: {
+                  ...job.message,
+                  ...updates.message,
+                  resume: job.message.resume,
+                  sessionId: job.message.sessionId,
+                },
+              }
+            : {}),
+        };
 
-      const updatedConfig: SchedulerConfig = {
-        jobs: config.jobs.map((j) => (j.id === jobId ? updatedJob : j)),
-      };
+        const updatedConfig: SchedulerConfig = {
+          jobs: config.jobs.map((j) => (j.id === jobId ? updatedJob : j)),
+        };
 
-      yield* writeConfig(updatedConfig);
+        yield* writeConfig(updatedConfig);
 
-      if (updatedJob.enabled) {
-        yield* startJob(updatedJob);
-      }
+        if (updatedJob.enabled) {
+          yield* startJob(updatedJob);
+        }
 
-      yield* emitSchedulerJobsChanged;
+        yield* emitSchedulerJobsChanged;
 
-      return updatedJob;
-    });
+        return updatedJob;
+      }),
+    );
 
   const deleteJobFromConfig = (jobId: string) =>
-    Effect.gen(function* () {
-      const config = yield* readConfig.pipe(
-        Effect.catchTags({
-          ConfigFileNotFoundError: () => initializeConfig.pipe(Effect.map(() => ({ jobs: [] }))),
-          ConfigParseError: () => initializeConfig.pipe(Effect.map(() => ({ jobs: [] }))),
-        }),
-      );
-      const job = config.jobs.find((j) => j.id === jobId);
+    configLock.withPermits(1)(
+      Effect.gen(function* () {
+        const config = yield* readConfig.pipe(
+          Effect.catchTags({
+            ConfigFileNotFoundError: () => initializeConfig.pipe(Effect.map(() => ({ jobs: [] }))),
+            ConfigParseError: () => initializeConfig.pipe(Effect.map(() => ({ jobs: [] }))),
+          }),
+        );
+        const job = config.jobs.find((j) => j.id === jobId);
 
-      if (job === undefined) {
-        return yield* Effect.fail(new SchedulerJobNotFoundError({ jobId }));
-      }
+        if (job === undefined) {
+          return yield* Effect.fail(new SchedulerJobNotFoundError({ jobId }));
+        }
 
-      const updatedConfig: SchedulerConfig = {
-        jobs: config.jobs.filter((j) => j.id !== jobId),
-      };
+        const updatedConfig: SchedulerConfig = {
+          jobs: config.jobs.filter((j) => j.id !== jobId),
+        };
 
-      yield* writeConfig(updatedConfig);
-    });
+        yield* writeConfig(updatedConfig);
+      }),
+    );
 
   const deleteJob = (jobId: string) =>
     Effect.gen(function* () {
