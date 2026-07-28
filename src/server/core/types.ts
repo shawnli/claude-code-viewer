@@ -9,6 +9,10 @@ export type Project = {
   claudeProjectPath: string;
   lastModifiedAt: Date;
   meta: ProjectMeta;
+  // Set when the row could not be built from a healthy read (malformed/transient
+  // bad DB row). The entry is still returned so the project is not silently
+  // dropped from the list; the UI renders it as an unavailable placeholder.
+  unavailable?: boolean;
 };
 
 export type ProjectMeta = z.infer<typeof projectMetaSchema>;
@@ -18,6 +22,11 @@ export type Session = {
   jsonlFilePath: string;
   lastModifiedAt: Date;
   meta: SessionMeta;
+  // Set when the row could not be built from a healthy read (malformed/transient
+  // bad DB row). The entry is still returned so the session is not silently
+  // dropped from the project detail page; the UI renders it as an unavailable
+  // placeholder rather than crashing the whole page.
+  unavailable?: boolean;
 };
 
 export type SessionMeta = z.infer<typeof sessionMetaSchema>;

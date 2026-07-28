@@ -231,7 +231,9 @@ describe("InitializeService", () => {
   describe("cache initialization", () => {
     it.live("doesn't throw error even if cache initialization fails", () => {
       const mockProjectRepositoryLayer = Layer.mock(ProjectRepository, {
-        getProjects: () => Effect.fail(new Error("Failed to get projects")),
+        // getProjects no longer has a recoverable error channel (bad rows are
+        // isolated internally), so simulate a hard crash with a defect instead.
+        getProjects: () => Effect.die(new Error("Failed to get projects")),
         getProject: () => Effect.fail(new Error("Not implemented in mock")),
       });
 

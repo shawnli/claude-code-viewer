@@ -309,15 +309,13 @@ const LayerImpl = Effect.gen(function* () {
         // Claude Code 的 jsonl 只 append,历史消息不改。查已存 MAX(conversation_index),
         // 只 INSERT 大于它的新消息;避免每次都 DELETE + 3.5w 行重 INSERT (原逻辑)。
         // 如果新 ftsEntries 数量 <= 已存 fts 行数 → 认为 session 被截断/重写 → 回落全量。
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- better-sqlite3 .get() returns unknown; shape is guaranteed by the SELECT above
         const existingMaxRow = rawDb
           .prepare(
             "SELECT MAX(CAST(conversation_index AS INTEGER)) as maxIdx, COUNT(*) as cnt FROM session_messages_fts WHERE session_id = ?",
           )
           .get(sessionId) as { maxIdx: number | null; cnt: number } | undefined;
-        const existingMax =
-          existingMaxRow?.maxIdx === null || existingMaxRow?.maxIdx === undefined
-            ? -1
-            : existingMaxRow.maxIdx;
+        const existingMax = existingMaxRow?.maxIdx ?? -1;
         const existingCnt = existingMaxRow?.cnt ?? 0;
         const canIncremental =
           existingCnt > 0 && ftsEntries.length >= existingCnt && ftsEntries.length > 0;

@@ -1,6 +1,6 @@
 import { Trans } from "@lingui/react";
 import { Link } from "@tanstack/react-router";
-import { FolderIcon } from "lucide-react";
+import { AlertTriangleIcon, FolderIcon } from "lucide-react";
 import type { FC } from "react";
 import { formatLocaleDate } from "@/lib/date/formatLocaleDate";
 import { Button } from "@/web/components/ui/button";
@@ -37,13 +37,29 @@ export const ProjectList: FC = () => {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {projects.map((project) => (
-        <Card key={project.id} className="hover:shadow-md transition-shadow">
+        <Card
+          key={project.id}
+          className={
+            project.unavailable === true
+              ? "border-destructive/40 opacity-60"
+              : "hover:shadow-md transition-shadow"
+          }
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2 justify-start items-start">
-              <FolderIcon className="w-5 h-5 flex-shrink-0" />
+              {project.unavailable === true ? (
+                <AlertTriangleIcon className="w-5 h-5 flex-shrink-0 text-destructive" />
+              ) : (
+                <FolderIcon className="w-5 h-5 flex-shrink-0" />
+              )}
               <span className="text-wrap flex-1">
                 {project.meta.projectName ?? project.claudeProjectPath}
               </span>
+              {project.unavailable === true ? (
+                <span className="flex-shrink-0 rounded bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
+                  <Trans id="project_list.unavailable" />
+                </span>
+              ) : null}
             </CardTitle>
             {project.meta.projectPath !== undefined && project.meta.projectPath !== "" ? (
               <CardDescription>{project.meta.projectPath}</CardDescription>
@@ -64,11 +80,17 @@ export const ProjectList: FC = () => {
             </p>
           </CardContent>
           <CardContent className="pt-0">
-            <Button asChild className="w-full">
-              <Link to={"/projects/$projectId/session"} params={{ projectId: project.id }}>
-                <Trans id="project_list.view_conversations" />
-              </Link>
-            </Button>
+            {project.unavailable === true ? (
+              <Button className="w-full" variant="outline" disabled>
+                <Trans id="project_list.unavailable" />
+              </Button>
+            ) : (
+              <Button asChild className="w-full">
+                <Link to={"/projects/$projectId/session"} params={{ projectId: project.id }}>
+                  <Trans id="project_list.view_conversations" />
+                </Link>
+              </Button>
+            )}
           </CardContent>
         </Card>
       ))}

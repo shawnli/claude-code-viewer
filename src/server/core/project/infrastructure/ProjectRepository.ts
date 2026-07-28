@@ -56,20 +56,56 @@ const LayerImpl = Effect.gen(function* () {
         return { projects: [] };
       }
 
-      const projectsList: Project[] = yield* Effect.all(
+      const buildProject = (row: (typeof rows)[number]): Effect.Effect<Project, Error> =>
+        Effect.gen(function* () {
+          if (!row.id) {
+            return yield* Effect.fail(new Error("blank project id"));
+          }
+          const meta = yield* projectMetaService.getProjectMeta(row.id);
+          const project: Project = {
+            id: row.id,
+            claudeProjectPath: row.path ?? decodeProjectId(row.id),
+            lastModifiedAt: new Date(row.dirMtimeMs),
+            meta,
+          };
+          return project;
+        });
+
+      const projectsList = yield* Effect.all(
         rows.map((row) =>
-          Effect.gen(function* () {
-            const meta = yield* projectMetaService.getProjectMeta(row.id);
-            return {
-              id: row.id,
-              claudeProjectPath: row.path ?? decodeProjectId(row.id),
-              lastModifiedAt: new Date(row.dirMtimeMs),
-              meta,
-            } satisfies Project;
-          }),
+          // A malformed row is usually a transient bad read, so retry once
+          // (sandbox/unsandbox lets retry see thrown defects too). If it still
+          // fails, keep the row as an unavailable placeholder instead of
+          // dropping it, so a broken project never silently vanishes.
+          buildProject(row).pipe(
+            Effect.sandbox,
+            Effect.retry({ times: 1 }),
+            Effect.unsandbox,
+            Effect.catchAllCause(() => {
+              const placeholder: Project = {
+                id: row.id || "<unavailable>",
+                claudeProjectPath: row.path ?? "",
+                lastModifiedAt: new Date(row.dirMtimeMs),
+                meta: { projectName: null, projectPath: row.path ?? null, sessionCount: 0 },
+                unavailable: true,
+              };
+              return Effect.succeed(placeholder);
+            }),
+          ),
         ),
         { concurrency: "unbounded" },
       );
+
+      const badIds = projectsList.filter((p) => p.unavailable === true).map((p) => p.id);
+      if (badIds.length > 0) {
+        // One capped line per request (not per row) to name the bad ids
+        // without spamming the log when many rows are bad.
+        const sample = badIds.slice(0, 5).join(", ");
+        const suffix = badIds.length > 5 ? `, +${badIds.length - 5} more` : "";
+        yield* Effect.logWarning(
+          `getProjects: ${badIds.length}/${projectsList.length} project row(s) unavailable after retry; ids: ${sample}${suffix}`,
+        );
+      }
 
       return { projects: projectsList };
     });

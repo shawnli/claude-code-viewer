@@ -15,6 +15,7 @@ import { SessionMetaService } from "../services/SessionMetaService.ts";
 const DEFAULT_PAGE_SIZE = 200;
 
 const getSessionPageSize = (): number => {
+  // oxlint-disable-next-line node/no-process-env -- configuration boundary
   const envVal = process.env.SESSION_PAGE_SIZE;
   if (envVal !== undefined && envVal !== "") {
     const parsed = parseInt(envVal, 10);
@@ -36,7 +37,9 @@ const countFileLines = async (filePath: string): Promise<number> => {
     const stream = createReadStream(filePath, { encoding: "utf8" });
     let lastChunk = "";
     stream.on("data", (chunk) => {
+      // oxlint-disable-next-line no-unsafe-type-assertion -- createReadStream with utf8 encoding always yields string chunks
       lastChunk = chunk as string;
+      // oxlint-disable-next-line no-unsafe-type-assertion -- createReadStream with utf8 encoding always yields string chunks
       for (const ch of chunk as string) if (ch === "\n") count++;
     });
     stream.on("end", () => {
@@ -70,6 +73,7 @@ const readLinesFromEnd = async (
     const stream = createReadStream(filePath, { encoding: "utf8" });
     stream.on("data", (chunk) => {
       if (destroyed) return;
+      // oxlint-disable-next-line no-unsafe-type-assertion -- createReadStream with utf8 encoding always yields string chunks
       buffer += chunk as string;
       let newlineIndex: number;
       while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
@@ -141,9 +145,7 @@ const LayerImpl = Effect.gen(function* () {
         // Count total lines to decide whether to paginate.
         const total = yield* Effect.promise(() => countFileLines(sessionPath));
         const shouldPaginate =
-          options?.limit !== undefined ||
-          options?.offset !== undefined ||
-          total > pageSize;
+          options?.limit !== undefined || options?.offset !== undefined || total > pageSize;
 
         let conversations;
         let actualTotal: number;
@@ -239,20 +241,78 @@ const LayerImpl = Effect.gen(function* () {
 
       const sessionsToReturn = rows.slice(startIndex, startIndex + maxCount);
 
-      const sessionsResult: Session[] = yield* Effect.all(
+      const buildSession = (row: (typeof rows)[number]): Effect.Effect<Session, Error> =>
+        Effect.gen(function* () {
+          if (!row.id) {
+            return yield* Effect.fail(new Error("blank session id"));
+          }
+          const meta = yield* sessionMetaService.getSessionMeta(projectId, row.id);
+          const session: Session = {
+            id: row.id,
+            jsonlFilePath: row.filePath,
+            lastModifiedAt: new Date(row.lastModifiedAt),
+            meta,
+          };
+          return session;
+        });
+
+      const sessionsResult = yield* Effect.all(
         sessionsToReturn.map((row) =>
-          Effect.gen(function* () {
-            const meta = yield* sessionMetaService.getSessionMeta(projectId, row.id);
-            return {
-              id: row.id,
-              jsonlFilePath: row.filePath,
-              lastModifiedAt: new Date(row.lastModifiedAt),
-              meta,
-            } satisfies Session;
-          }),
+          // A malformed row is usually a transient bad read, so retry once
+          // (sandbox/unsandbox lets retry see thrown defects too). If it still
+          // fails, keep the row as an unavailable placeholder instead of
+          // dropping it, so a broken session never silently vanishes and a bad
+          // row can never crash the whole project detail page.
+          buildSession(row).pipe(
+            Effect.sandbox,
+            Effect.retry({ times: 1 }),
+            Effect.unsandbox,
+            Effect.catchAllCause(() => {
+              const placeholder: Session = {
+                id: row.id || "<unavailable>",
+                jsonlFilePath: row.filePath ?? "",
+                lastModifiedAt: new Date(row.lastModifiedAt),
+                meta: {
+                  messageCount: 0,
+                  firstUserMessage: null,
+                  customTitle: null,
+                  cost: {
+                    totalUsd: 0,
+                    breakdown: {
+                      inputTokensUsd: 0,
+                      outputTokensUsd: 0,
+                      cacheCreationUsd: 0,
+                      cacheReadUsd: 0,
+                    },
+                    tokenUsage: {
+                      inputTokens: 0,
+                      outputTokens: 0,
+                      cacheCreationTokens: 0,
+                      cacheReadTokens: 0,
+                    },
+                  },
+                  modelName: null,
+                  prLinks: [],
+                },
+                unavailable: true,
+              };
+              return Effect.succeed(placeholder);
+            }),
+          ),
         ),
         { concurrency: "unbounded" },
       );
+
+      const badIds = sessionsResult.filter((s) => s.unavailable === true).map((s) => s.id);
+      if (badIds.length > 0) {
+        // One capped line per request (not per row) to name the bad ids
+        // without spamming the log when many rows are bad.
+        const sample = badIds.slice(0, 5).join(", ");
+        const suffix = badIds.length > 5 ? `, +${badIds.length - 5} more` : "";
+        yield* Effect.logWarning(
+          `getSessions: ${badIds.length}/${sessionsResult.length} session row(s) unavailable after retry; ids: ${sample}${suffix}`,
+        );
+      }
 
       return { sessions: sessionsResult };
     });

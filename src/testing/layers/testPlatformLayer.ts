@@ -63,6 +63,8 @@ export const testPlatformLayer = (overrides?: {
             return overrides?.env?.CCV_TERMINAL_UNRESTRICTED ?? undefined;
           case "CCV_TERMINAL_DISABLED":
             return overrides?.env?.CCV_TERMINAL_DISABLED ?? undefined;
+          case "SESSION_PAGE_SIZE":
+            return overrides?.env?.SESSION_PAGE_SIZE ?? undefined;
           default:
             return undefined;
         }

@@ -1,7 +1,7 @@
 import { Trans } from "@lingui/react";
 import { Link } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
-import { MessageSquareIcon, PlusIcon } from "lucide-react";
+import { AlertTriangleIcon, MessageSquareIcon, PlusIcon } from "lucide-react";
 import { type FC, useEffect, useMemo, useRef } from "react";
 import { formatLocaleDate } from "@/lib/date/formatLocaleDate";
 import { createVirtualSessionEntries } from "@/lib/virtual-messages/createVirtualSessionEntries";
@@ -138,41 +138,49 @@ export const SessionsTab: FC<{
           const sessionProcess = sessionProcesses.find((task) => task.sessionId === session.id);
           const isRunning = sessionProcess?.status === "running";
           const isPaused = sessionProcess?.status === "paused";
+          // A row that could not be built from a healthy read: show it, but do
+          // not let it navigate into a session detail that would fail to load.
+          const isUnavailable = "unavailable" in session && session.unavailable === true;
 
-          return (
-            <Link
-              key={session.id}
-              ref={isActive ? activeSessionRef : undefined}
-              to="/projects/$projectId/session"
-              params={{ projectId }}
-              search={{ tab: currentTab, sessionId: session.id }}
-              onClick={onSessionSelect}
-              className={cn(
-                "group relative block rounded-lg p-2.5 transition-all duration-200 hover:bg-blue-50/60 dark:hover:bg-blue-950/40 hover:border-blue-300/60 dark:hover:border-blue-700/60 hover:shadow-sm border border-sidebar-border/40 bg-sidebar/30",
-                isActive &&
-                  "bg-blue-100 dark:bg-blue-900/50 border-blue-400 dark:border-blue-600 shadow-md ring-1 ring-blue-200/50 dark:ring-blue-700/50 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:border-blue-400 dark:hover:border-blue-600",
-              )}
-            >
+          const cardClassName = cn(
+            "group relative block rounded-lg p-2.5 transition-all duration-200 border bg-sidebar/30",
+            isUnavailable
+              ? "border-destructive/40 opacity-60 cursor-not-allowed"
+              : "hover:bg-blue-50/60 dark:hover:bg-blue-950/40 hover:border-blue-300/60 dark:hover:border-blue-700/60 hover:shadow-sm border-sidebar-border/40",
+            isActive &&
+              !isUnavailable &&
+              "bg-blue-100 dark:bg-blue-900/50 border-blue-400 dark:border-blue-600 shadow-md ring-1 ring-blue-200/50 dark:ring-blue-700/50 hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:border-blue-400 dark:hover:border-blue-600",
+          );
+
+          const cardBody = (
+            <>
               <div className="space-y-1.5">
                 <div className="flex items-start justify-between gap-2 pr-6">
                   <h3 className="text-sm font-medium line-clamp-2 leading-tight text-sidebar-foreground flex-1">
                     {title}
                   </h3>
-                  {(isRunning || isPaused) && (
-                    <Badge
-                      variant={isRunning ? "default" : "secondary"}
-                      className={cn(
-                        "text-xs shrink-0",
-                        isRunning && "bg-green-500 text-white",
-                        isPaused && "bg-yellow-500 text-white",
-                      )}
-                    >
-                      {isRunning ? (
-                        <Trans id="session.status.running" />
-                      ) : (
-                        <Trans id="session.status.paused" />
-                      )}
-                    </Badge>
+                  {isUnavailable ? (
+                    <span className="flex shrink-0 items-center gap-1 rounded bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
+                      <AlertTriangleIcon className="w-3 h-3" />
+                      <Trans id="project_list.unavailable" />
+                    </span>
+                  ) : (
+                    (isRunning || isPaused) && (
+                      <Badge
+                        variant={isRunning ? "default" : "secondary"}
+                        className={cn(
+                          "text-xs shrink-0",
+                          isRunning && "bg-green-500 text-white",
+                          isPaused && "bg-yellow-500 text-white",
+                        )}
+                      >
+                        {isRunning ? (
+                          <Trans id="session.status.running" />
+                        ) : (
+                          <Trans id="session.status.paused" />
+                        )}
+                      </Badge>
+                    )
                   )}
                 </div>
                 <div className="flex items-center justify-between gap-2">
@@ -192,6 +200,33 @@ export const SessionsTab: FC<{
                   )}
                 </div>
               </div>
+            </>
+          );
+
+          if (isUnavailable) {
+            return (
+              <div
+                key={session.id}
+                className={cardClassName}
+                aria-disabled="true"
+                title="unavailable"
+              >
+                {cardBody}
+              </div>
+            );
+          }
+
+          return (
+            <Link
+              key={session.id}
+              ref={isActive ? activeSessionRef : undefined}
+              to="/projects/$projectId/session"
+              params={{ projectId }}
+              search={{ tab: currentTab, sessionId: session.id }}
+              onClick={onSessionSelect}
+              className={cardClassName}
+            >
+              {cardBody}
             </Link>
           );
         })}

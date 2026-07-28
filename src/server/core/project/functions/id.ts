@@ -43,6 +43,11 @@ export const encodeProjectId = (fullPath: string) => {
 };
 
 export const decodeProjectId = (id: string) => {
+  // Guard against empty/null ids (e.g. from a transient malformed DB read):
+  // fail loudly with a clear message instead of silently decoding garbage.
+  if (!id) {
+    throw new Error("decodeProjectId: empty or null projectId");
+  }
   return Buffer.from(id, "base64url").toString("utf-8");
 };
 
