@@ -1,6 +1,6 @@
 import { FileSystem } from "@effect/platform";
 import { desc, eq, sql } from "drizzle-orm";
-import { Context, Effect, Layer, Option } from "effect";
+import { Cause, Context, Effect, Layer, Option } from "effect";
 import { DrizzleService } from "../../../lib/db/DrizzleService.ts";
 import { projects, sessions } from "../../../lib/db/schema.ts";
 import type { InferEffect } from "../../../lib/effect/types.ts";
@@ -267,7 +267,10 @@ const LayerImpl = Effect.gen(function* () {
             Effect.sandbox,
             Effect.retry({ times: 1 }),
             Effect.unsandbox,
-            Effect.catchAllCause(() => {
+            Effect.catchAllCause((cause) => {
+              const errMsg = (Cause.pretty(cause).split("\n")[0] ?? "").slice(0, 120);
+              const looksCorrupt =
+                (row.id?.length ?? 0) > 40 && /^[A-Za-z0-9_-]+$/.test(row.id ?? "");
               const placeholder: Session = {
                 id: row.id || "<unavailable>",
                 jsonlFilePath: row.filePath ?? "",
@@ -296,7 +299,15 @@ const LayerImpl = Effect.gen(function* () {
                 },
                 unavailable: true,
               };
-              return Effect.succeed(placeholder);
+              return (
+                looksCorrupt
+                  ? Effect.logError(
+                      `getSessions: row id looks like a project id — possible DB corruption; id=${row.id} path=${row.filePath ?? "(no path)"} error=${errMsg}`,
+                    )
+                  : Effect.logWarning(
+                      `getSessions: row unavailable; id=${row.id ?? "<blank>"} path=${row.filePath ?? "(no path)"} error=${errMsg}`,
+                    )
+              ).pipe(Effect.andThen(Effect.succeed(placeholder)));
             }),
           ),
         ),

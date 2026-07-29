@@ -1,6 +1,6 @@
 import { FileSystem } from "@effect/platform";
 import { desc } from "drizzle-orm";
-import { Context, Effect, Layer, Option } from "effect";
+import { Cause, Context, Effect, Layer, Option } from "effect";
 import { DrizzleService } from "../../../lib/db/DrizzleService.ts";
 import { projects } from "../../../lib/db/schema.ts";
 import type { InferEffect } from "../../../lib/effect/types.ts";
@@ -81,7 +81,12 @@ const LayerImpl = Effect.gen(function* () {
             Effect.sandbox,
             Effect.retry({ times: 1 }),
             Effect.unsandbox,
-            Effect.catchAllCause(() => {
+            Effect.catchAllCause((cause) => {
+              const errMsg = (Cause.pretty(cause).split("\n")[0] ?? "").slice(0, 120);
+              const looksCorrupt =
+                /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+                  row.id ?? "",
+                );
               const placeholder: Project = {
                 id: row.id || "<unavailable>",
                 claudeProjectPath: row.path ?? "",
@@ -89,7 +94,15 @@ const LayerImpl = Effect.gen(function* () {
                 meta: { projectName: null, projectPath: row.path ?? null, sessionCount: 0 },
                 unavailable: true,
               };
-              return Effect.succeed(placeholder);
+              return (
+                looksCorrupt
+                  ? Effect.logError(
+                      `getProjects: row id looks like a session uuid — possible DB corruption; id=${row.id} path=${row.path ?? "(no path)"} error=${errMsg}`,
+                    )
+                  : Effect.logWarning(
+                      `getProjects: row unavailable; id=${row.id ?? "<blank>"} path=${row.path ?? "(no path)"} error=${errMsg}`,
+                    )
+              ).pipe(Effect.andThen(Effect.succeed(placeholder)));
             }),
           ),
         ),
