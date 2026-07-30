@@ -220,7 +220,8 @@ const SessionPageMainContent: FC<
     );
   }, [allSchedulerJobs, hasSessionId, projectId, sessionId]);
 
-  const [previousConversationLength, setPreviousConversationLength] = useState(0);
+  const totalMessageCount = sessionData?.total ?? 0;
+  const [previousTotalMessageCount, setPreviousTotalMessageCount] = useState(0);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const scrollSettleRafIdRef = useRef<number | null>(null);
@@ -264,22 +265,29 @@ const SessionPageMainContent: FC<
 
   useEffect(() => {
     if (!isExistingSession) return;
-    if (effectiveSessionStatus === "running" && conversationCount !== previousConversationLength) {
+    // 用 total（跨全部页的消息总数）判断新消息，而不是当前页的 conversations.length——
+    // 后者在多页 session 里当 page 1 满 200 条后不会再增长（新消息挤走最旧一条），
+    // 会导致自动落底逻辑完全不触发。也不再限定 effectiveSessionStatus === "running"，
+    // worker 在 session 非 running 状态下追加消息时也应跟随。
+    if (totalMessageCount !== previousTotalMessageCount) {
       if (!isNearBottomRef.current) {
-        setPreviousConversationLength(conversationCount);
+        setPreviousTotalMessageCount(totalMessageCount);
         return;
       }
-
-      setPreviousConversationLength(conversationCount);
+      setPreviousTotalMessageCount(totalMessageCount);
       scrollToBottomSettled(6);
     }
-  }, [
-    conversationCount,
-    isExistingSession,
-    effectiveSessionStatus,
-    previousConversationLength,
-    scrollToBottomSettled,
-  ]);
+  }, [totalMessageCount, isExistingSession, previousTotalMessageCount, scrollToBottomSettled]);
+
+  // 首次打开任何 session 强制落底一次（无视 status / 无视 near-bottom）。同一 sessionId 只触发一次。
+  const didInitialScrollForSessionRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!isExistingSession || sessionId === undefined) return;
+    if (conversationCount === 0) return;
+    if (didInitialScrollForSessionRef.current === sessionId) return;
+    didInitialScrollForSessionRef.current = sessionId;
+    scrollToBottomSettled(8);
+  }, [isExistingSession, sessionId, conversationCount, scrollToBottomSettled]);
 
   const handleScrollToTop = () => {
     const scrollContainer = scrollContainerRef.current;
