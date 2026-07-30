@@ -13,6 +13,7 @@ const sessionSearchSchema = z.object({
   tab: tabSchema.optional().default("sessions"),
   rightPanel: z.boolean().optional(),
   rightPanelTab: rightPanelTabSchema.optional(),
+  page: z.coerce.number().int().min(1).optional(),
 });
 
 const RouteComponent = () => {

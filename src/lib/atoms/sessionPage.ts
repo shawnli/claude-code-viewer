@@ -1,16 +1,25 @@
-import { atom, useAtom } from "jotai";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useCallback } from "react";
 
-const sessionPageStoreAtom = atom<Record<string, number>>({});
-
-export const useSessionPage = (sessionId: string) => {
-  const [store, setStore] = useAtom(sessionPageStoreAtom);
-  const page = store[sessionId] ?? 1;
+// Page state persisted in the URL search param (?page=N).
+export const useSessionPage = (_sessionId: string) => {
+  const search = useSearch({ from: "/projects/$projectId/session" }) as {
+    page?: number;
+  };
+  const navigate = useNavigate({ from: "/projects/$projectId/session" });
+  const page = search.page ?? 1;
   const setPage = useCallback(
     (next: number) => {
-      setStore((prev) => ({ ...prev, [sessionId]: Math.max(1, next) }));
+      const clamped = Math.max(1, next);
+      void navigate({
+        search: (prev) => ({
+          ...prev,
+          page: clamped === 1 ? undefined : clamped,
+        }),
+        replace: false,
+      });
     },
-    [sessionId, setStore],
+    [navigate],
   );
   return [page, setPage] as const;
 };
