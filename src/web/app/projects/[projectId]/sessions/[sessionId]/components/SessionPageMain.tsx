@@ -267,8 +267,7 @@ const SessionPageMainContent: FC<
     if (!isExistingSession) return;
     // 用 total（跨全部页的消息总数）判断新消息，而不是当前页的 conversations.length——
     // 后者在多页 session 里当 page 1 满 200 条后不会再增长（新消息挤走最旧一条），
-    // 会导致自动落底逻辑完全不触发。也不再限定 effectiveSessionStatus === "running"，
-    // worker 在 session 非 running 状态下追加消息时也应跟随。
+    // 会导致自动落底逻辑完全不触发。
     if (totalMessageCount !== previousTotalMessageCount) {
       if (!isNearBottomRef.current) {
         setPreviousTotalMessageCount(totalMessageCount);
@@ -681,8 +680,21 @@ const SessionPageMainContent: FC<
               scrollContainerRef={scrollContainerRef}
               enableInPageSearch
             />
+            {isExistingSession && effectiveSessionStatus === "running" && (
+              <div className="flex justify-start items-center py-8 animate-in fade-in duration-500">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="relative">
+                    <LoaderIcon className="w-8 h-8 animate-spin text-primary" />
+                    <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
+                  </div>
+                  <p className="text-sm text-muted-foreground font-medium animate-pulse">
+                    <Trans id="session.processing" />
+                  </p>
+                </div>
+              </div>
+            )}
             {isExistingSession && sessionData !== null && sessionData.totalPages > 1 && (
-              <div className="w-full border-t border-border/50 py-1.5 flex justify-center">
+              <div className="sticky bottom-0 z-10 w-full border-t border-border/50 py-1.5 flex justify-center bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
                 <Pagination
                   currentPage={sessionData.page}
                   totalPages={sessionData.totalPages}
@@ -783,19 +795,6 @@ const SessionPageMainContent: FC<
                     </div>
                   </div>
                 )}
-              </div>
-            )}
-            {isExistingSession && effectiveSessionStatus === "running" && (
-              <div className="flex justify-start items-center py-8 animate-in fade-in duration-500">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="relative">
-                    <LoaderIcon className="w-8 h-8 animate-spin text-primary" />
-                    <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
-                  </div>
-                  <p className="text-sm text-muted-foreground font-medium animate-pulse">
-                    <Trans id="session.processing" />
-                  </p>
-                </div>
               </div>
             )}
           </main>
