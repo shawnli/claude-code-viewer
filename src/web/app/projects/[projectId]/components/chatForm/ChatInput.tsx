@@ -13,6 +13,7 @@ import {
 import { type FC, useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useChatInputDraft } from "@/lib/atoms/chatInputDrafts";
+import { randomUUID } from "@/lib/randomUUID";
 import type {
   CCOptionsSchema,
   DocumentBlockParam,
@@ -273,7 +274,7 @@ export const ChatInput: FC<ChatInputProps> = ({
             content: message,
             projectId,
             sessionId:
-              baseSessionId !== null && baseSessionId !== "" ? baseSessionId : crypto.randomUUID(),
+              baseSessionId !== null && baseSessionId !== "" ? baseSessionId : randomUUID(),
             resume: baseSessionId !== null && baseSessionId !== "",
           },
           enabled: true,

@@ -135,7 +135,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ChatInput.tsx",
-        487
+        488
       ]
     ],
     "translation": "Message input with autocomplete support"
@@ -536,7 +536,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ChatInput.tsx",
-        579
+        580
       ]
     ],
     "translation": "Attach"
@@ -559,7 +559,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ChatInput.tsx",
-        209
+        210
       ]
     ],
     "translation": "Failed to copy command"
@@ -571,7 +571,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ChatInput.tsx",
-        202
+        203
       ]
     ],
     "translation": "Command copied to clipboard"
@@ -582,7 +582,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ChatInput.tsx",
-        453
+        454
       ]
     ],
     "translation": "Failed to send message. Please try again."
@@ -778,7 +778,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ChatInput.tsx",
-        299
+        300
       ]
     ],
     "translation": "Failed to schedule message"
@@ -790,7 +790,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ChatInput.tsx",
-        283
+        284
       ]
     ],
     "translation": "Message scheduled successfully"
@@ -802,7 +802,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ChatInput.tsx",
-        288
+        289
       ]
     ],
     "translation": "You can view and manage it in the Scheduler tab"
@@ -824,7 +824,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ChatInput.tsx",
-        532
+        533
       ]
     ],
     "translation": "Send Now"
@@ -835,7 +835,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ChatInput.tsx",
-        517
+        518
       ]
     ],
     "translation": "Send Mode"
@@ -846,11 +846,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ChatInput.tsx",
-        535
+        536
       ],
       [
         "src/web/app/projects/[projectId]/components/chatForm/ChatInput.tsx",
-        674
+        675
       ]
     ],
     "translation": "Schedule Send"
@@ -861,7 +861,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ChatInput.tsx",
-        542
+        543
       ]
     ],
     "translation": "Scheduled Send Time"
@@ -901,7 +901,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ChatInput.tsx",
-        644
+        645
       ]
     ],
     "translation": "Select reasoning effort"
@@ -913,7 +913,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ChatInput.tsx",
-        612
+        613
       ]
     ],
     "translation": "Select model"
@@ -997,7 +997,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ChatInput.tsx",
-        714
+        715
       ]
     ],
     "translation": "Voice input"
@@ -1059,7 +1059,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        314
+        315
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/DeleteSessionDialog.tsx",
@@ -1078,7 +1078,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        322
+        323
       ]
     ],
     "translation": "Create"
@@ -1165,7 +1165,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        318
+        319
       ]
     ],
     "translation": "Saving..."
@@ -1176,7 +1176,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        320
+        321
       ]
     ],
     "translation": "Update"
@@ -2768,7 +2768,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        158
+        159
       ]
     ],
     "translation": "Configure a scheduled job to send messages to Claude Code"
@@ -2779,7 +2779,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        154
+        155
       ]
     ],
     "translation": "Create Scheduled Job"
@@ -2790,7 +2790,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        152
+        153
       ]
     ],
     "translation": "Edit Scheduled Job"
@@ -2816,7 +2816,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        289
+        290
       ]
     ],
     "translation": "Concurrency Policy"
@@ -2827,7 +2827,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        304
+        305
       ]
     ],
     "translation": "Run even if already running"
@@ -2838,7 +2838,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        301
+        302
       ]
     ],
     "translation": "Skip if already running"
@@ -2849,7 +2849,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        167
+        168
       ]
     ],
     "translation": "Enable"
@@ -2860,7 +2860,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        170
+        171
       ]
     ],
     "translation": "Enable or disable this scheduled job"
@@ -2871,7 +2871,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        246
+        247
       ]
     ],
     "translation": "Message Content"
@@ -2883,7 +2883,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        262
+        263
       ]
     ],
     "translation": "Message input with completion support (/ for commands, @ for files)"
@@ -2894,7 +2894,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        281
+        282
       ]
     ],
     "translation": "/ for command completion, @ for file completion"
@@ -2906,7 +2906,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        255
+        256
       ]
     ],
     "translation": "Type message to send to Claude Code... (/ for commands, @ for files)"
@@ -2917,7 +2917,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        184
+        185
       ]
     ],
     "translation": "Job Name"
@@ -2928,7 +2928,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        228
+        229
       ]
     ],
     "translation": "Scheduled Execution Time"
@@ -2939,7 +2939,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        238
+        239
       ]
     ],
     "translation": "Will be executed once at the specified date and time, then automatically deleted"
@@ -2950,7 +2950,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        201
+        202
       ]
     ],
     "translation": "Schedule Type"
@@ -2961,7 +2961,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        213
+        214
       ]
     ],
     "translation": "Recurring (Cron)"
@@ -2972,7 +2972,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        216
+        217
       ]
     ],
     "translation": "One-time Execution"
