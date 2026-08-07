@@ -220,5 +220,8 @@
   },
   "review.comments.empty": {
     "translation": "No comments"
+  },
+  "scheduler.view_session": {
+    "translation": "View session"
   }
 }

@@ -223,5 +223,8 @@
   },
   "review.comments.empty": {
     "translation": "コメントなし"
+  },
+  "scheduler.view_session": {
+    "translation": "セッションを表示"
   }
 }

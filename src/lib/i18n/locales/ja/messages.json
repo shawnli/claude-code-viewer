@@ -1067,7 +1067,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        318
+        331
       ]
     ],
     "translation": "キャンセル"
@@ -1093,7 +1093,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        325
+        338
       ]
     ],
     "translation": "削除"
@@ -1108,7 +1108,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        325
+        338
       ]
     ],
     "translation": "削除中..."
@@ -1154,7 +1154,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        171
+        172
       ]
     ],
     "translation": "再読み込み"
@@ -2735,7 +2735,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        185
+        186
       ]
     ],
     "translation": "ジョブを作成"
@@ -2746,7 +2746,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        306
+        319
       ]
     ],
     "translation": "このスケジューラジョブを削除してもよろしいですか？この操作は取り消せません。"
@@ -2757,7 +2757,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        303
+        316
       ]
     ],
     "translation": "スケジューラジョブを削除"
@@ -2805,7 +2805,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        207
+        208
       ]
     ],
     "translation": "スケジューラジョブの読み込みに失敗しました: {error}"
@@ -2984,7 +2984,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        54
+        55
       ]
     ],
     "translation": "ジョブの作成に失敗しました"
@@ -2996,7 +2996,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        45
+        46
       ]
     ],
     "translation": "ジョブを作成しました"
@@ -3008,7 +3008,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        116
+        117
       ]
     ],
     "translation": "ジョブの削除に失敗しました"
@@ -3020,7 +3020,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        106
+        107
       ]
     ],
     "translation": "ジョブを削除しました"
@@ -3032,7 +3032,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        87
+        88
       ]
     ],
     "translation": "ジョブの更新に失敗しました"
@@ -3044,7 +3044,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        77
+        78
       ]
     ],
     "translation": "ジョブを更新しました"
@@ -3055,7 +3055,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        264
+        277
       ]
     ],
     "translation": "最終実行"
@@ -3066,7 +3066,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        213
+        214
       ]
     ],
     "translation": "スケジューラジョブがありません"
@@ -3077,7 +3077,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        234
+        235
       ]
     ],
     "translation": "無効"
@@ -3088,7 +3088,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        232
+        233
       ]
     ],
     "translation": "有効"
@@ -3099,10 +3099,21 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        160
+        161
       ]
     ],
     "translation": "スケジューラ"
+  },
+  "scheduler.view_session": {
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
+        269
+      ]
+    ],
+    "translation": "セッションを表示"
   },
   "session.conversation.abort": {
     "placeholders": {},

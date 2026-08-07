@@ -1067,7 +1067,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        318
+        331
       ]
     ],
     "translation": "取消"
@@ -1093,7 +1093,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        325
+        338
       ]
     ],
     "translation": "删除"
@@ -1108,7 +1108,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        325
+        338
       ]
     ],
     "translation": "删除中..."
@@ -1154,7 +1154,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        171
+        172
       ]
     ],
     "translation": "刷新"
@@ -2735,7 +2735,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        185
+        186
       ]
     ],
     "translation": "创建任务"
@@ -2746,7 +2746,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        306
+        319
       ]
     ],
     "translation": "确定要删除此定时任务吗?此操作无法撤销。"
@@ -2757,7 +2757,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        303
+        316
       ]
     ],
     "translation": "删除定时任务"
@@ -2805,7 +2805,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        207
+        208
       ]
     ],
     "translation": "加载定时任务失败:{error}"
@@ -2984,7 +2984,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        54
+        55
       ]
     ],
     "translation": "创建任务失败"
@@ -2996,7 +2996,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        45
+        46
       ]
     ],
     "translation": "任务创建成功"
@@ -3008,7 +3008,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        116
+        117
       ]
     ],
     "translation": "删除任务失败"
@@ -3020,7 +3020,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        106
+        107
       ]
     ],
     "translation": "任务删除成功"
@@ -3032,7 +3032,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        87
+        88
       ]
     ],
     "translation": "更新任务失败"
@@ -3044,7 +3044,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        77
+        78
       ]
     ],
     "translation": "任务更新成功"
@@ -3055,7 +3055,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        264
+        277
       ]
     ],
     "translation": "上次运行"
@@ -3066,7 +3066,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        213
+        214
       ]
     ],
     "translation": "暂无定时任务"
@@ -3077,7 +3077,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        234
+        235
       ]
     ],
     "translation": "已禁用"
@@ -3088,7 +3088,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        232
+        233
       ]
     ],
     "translation": "已启用"
@@ -3099,10 +3099,21 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        160
+        161
       ]
     ],
     "translation": "定时任务"
+  },
+  "scheduler.view_session": {
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
+        269
+      ]
+    ],
+    "translation": "查看当前会话"
   },
   "session.conversation.abort": {
     "placeholders": {},

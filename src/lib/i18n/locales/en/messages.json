@@ -1067,7 +1067,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        318
+        331
       ]
     ],
     "translation": "Cancel"
@@ -1093,7 +1093,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        325
+        338
       ]
     ],
     "translation": "Delete"
@@ -1108,7 +1108,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        325
+        338
       ]
     ],
     "translation": "Deleting..."
@@ -1154,7 +1154,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        171
+        172
       ]
     ],
     "translation": "Reload"
@@ -2735,7 +2735,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        185
+        186
       ]
     ],
     "translation": "Create Job"
@@ -2746,7 +2746,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        306
+        319
       ]
     ],
     "translation": "Are you sure you want to delete this scheduler job? This action cannot be undone."
@@ -2757,7 +2757,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        303
+        316
       ]
     ],
     "translation": "Delete Scheduler Job"
@@ -2805,7 +2805,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        207
+        208
       ]
     ],
     "translation": "Failed to load scheduler jobs: {error}"
@@ -2984,7 +2984,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        54
+        55
       ]
     ],
     "translation": "Failed to create job"
@@ -2996,7 +2996,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        45
+        46
       ]
     ],
     "translation": "Job created successfully"
@@ -3008,7 +3008,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        116
+        117
       ]
     ],
     "translation": "Failed to delete job"
@@ -3020,7 +3020,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        106
+        107
       ]
     ],
     "translation": "Job deleted successfully"
@@ -3032,7 +3032,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        87
+        88
       ]
     ],
     "translation": "Failed to update job"
@@ -3044,7 +3044,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        77
+        78
       ]
     ],
     "translation": "Job updated successfully"
@@ -3055,7 +3055,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        264
+        277
       ]
     ],
     "translation": "Last Run"
@@ -3066,7 +3066,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        213
+        214
       ]
     ],
     "translation": "No scheduler jobs"
@@ -3077,7 +3077,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        234
+        235
       ]
     ],
     "translation": "Disabled"
@@ -3088,7 +3088,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        232
+        233
       ]
     ],
     "translation": "Enabled"
@@ -3099,10 +3099,21 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
-        160
+        161
       ]
     ],
     "translation": "Scheduler"
+  },
+  "scheduler.view_session": {
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SchedulerTab.tsx",
+        269
+      ]
+    ],
+    "translation": "View session"
   },
   "session.conversation.abort": {
     "placeholders": {},

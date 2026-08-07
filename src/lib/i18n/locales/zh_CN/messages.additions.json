@@ -223,5 +223,8 @@
   },
   "review.comments.empty": {
     "translation": "无评论"
+  },
+  "scheduler.view_session": {
+    "translation": "查看当前会话"
   }
 }

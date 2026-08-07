@@ -1,4 +1,5 @@
 import { Trans, useLingui } from "@lingui/react";
+import { Link } from "@tanstack/react-router";
 import { EditIcon, PlusIcon, RefreshCwIcon, TrashIcon } from "lucide-react";
 import { type FC, useState } from "react";
 import { toast } from "sonner";
@@ -257,6 +258,18 @@ export const SchedulerTab: FC<{ projectId: string; sessionId: string }> = ({
                   </div>
                 </div>
 
+                {job.message.resume && job.message.sessionId && (
+                  <div className="mt-2 pt-2 border-t border-sidebar-border">
+                    <Link
+                      to="/projects/$projectId/session"
+                      params={{ projectId: job.message.projectId }}
+                      search={{ tab: "sessions", sessionId: job.message.sessionId }}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      → <Trans id="scheduler.view_session" />
+                    </Link>
+                  </div>
+                )}
                 {job.lastRunAt !== null && job.lastRunAt !== "" && (
                   <div className="text-xs text-muted-foreground mt-2 pt-2 border-t border-sidebar-border">
                     <div className="flex items-center justify-between">
