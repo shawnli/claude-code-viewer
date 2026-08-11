@@ -31,6 +31,7 @@ export type ContinueClaudeCodeTurnDef = BaseClaudeCodeTurnDef & {
   type: "continue"; // continue from current session process
   sessionId: string;
   baseSessionId: string;
+  ccOptions?: CCOptions;
 };
 
 export type ResumeClaudeCodeTurnDef = BaseClaudeCodeTurnDef & {

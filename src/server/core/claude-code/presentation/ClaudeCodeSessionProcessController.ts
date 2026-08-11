@@ -75,9 +75,10 @@ const LayerImpl = Effect.gen(function* () {
     input: UserMessageInput;
     baseSessionId: string;
     sessionProcessId: string;
+    ccOptions?: CCTurn.CCOptions;
   }) =>
     Effect.gen(function* () {
-      const { projectId, input, baseSessionId, sessionProcessId } = options;
+      const { projectId, input, baseSessionId, sessionProcessId, ccOptions } = options;
 
       const { project } = yield* projectRepository.getProject(projectId);
 
@@ -92,6 +93,7 @@ const LayerImpl = Effect.gen(function* () {
         sessionProcessId,
         input,
         baseSessionId,
+        ccOptions,
       });
 
       return {

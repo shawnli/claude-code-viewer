@@ -130,6 +130,7 @@ export const useContinueSessionProcessMutation = (projectId: string, baseSession
               projectId: projectId,
               baseSessionId: baseSessionId,
               input: options.input,
+              ccOptions: options.input.ccOptions,
             },
           },
           {

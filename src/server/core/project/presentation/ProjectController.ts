@@ -1,5 +1,6 @@
 import { FileSystem, Path } from "@effect/platform";
 import { Context, Effect, Layer } from "effect";
+import { randomUUID } from "../../../../lib/randomUUID.ts";
 import type { ControllerResponse } from "../../../lib/effect/toEffectResponse.ts";
 import type { InferEffect } from "../../../lib/effect/types.ts";
 import { computeClaudeProjectFilePath } from "../../claude-code/functions/computeClaudeProjectFilePath.ts";
@@ -132,7 +133,7 @@ const LayerImpl = Effect.gen(function* () {
       const result = yield* claudeCodeLifeCycleService.startSessionProcess({
         projectId,
         cwd: projectPath,
-        sessionId: crypto.randomUUID(),
+        sessionId: randomUUID(),
         resume: false,
         input: {
           text: claudeMdExists ? "describe this project" : "/init",

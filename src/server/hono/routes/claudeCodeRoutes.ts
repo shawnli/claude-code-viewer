@@ -95,6 +95,7 @@ const claudeCodeRoutes = Effect.gen(function* () {
           projectId: z.string(),
           input: userMessageInputSchema,
           baseSessionId: z.string(),
+          ccOptions: ccOptionsSchema.optional(),
         }),
       ),
       async (c) => {

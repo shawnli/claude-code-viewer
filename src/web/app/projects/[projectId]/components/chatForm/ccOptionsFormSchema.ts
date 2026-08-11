@@ -58,7 +58,7 @@ const defaultSettingSources: Array<"user" | "project" | "local"> = ["user", "pro
 export const getDefaultCCOptions = (): CCOptionsSchema => {
   return {
     settingSources: [...defaultSettingSources],
-    permissionMode: "default",
+    permissionMode: "bypassPermissions",
     systemPrompt: {
       type: "preset",
       preset: "claude_code",
@@ -98,7 +98,7 @@ export const hasNonDefaultCCOptions = (options: CCOptionsSchema | undefined): bo
     options.maxThinkingTokens !== undefined ||
     options.maxBudgetUsd !== undefined ||
     options.effort !== undefined ||
-    (options.permissionMode !== undefined && options.permissionMode !== "default");
+    (options.permissionMode !== undefined && options.permissionMode !== "bypassPermissions");
 
   return settingSourcesChanged || hasOtherSettings;
 };

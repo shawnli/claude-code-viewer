@@ -41,8 +41,9 @@ const LayerImpl = Effect.gen(function* () {
     sessionProcessId: string;
     baseSessionId: string;
     input: UserMessageInput;
+    ccOptions?: CCTurn.CCOptions;
   }) => {
-    const { sessionProcessId, baseSessionId, input } = options;
+    const { sessionProcessId, baseSessionId, input, ccOptions } = options;
 
     return Effect.gen(function* () {
       const { sessionProcess, task } = yield* sessionProcessService.continueSessionProcess({
@@ -52,6 +53,7 @@ const LayerImpl = Effect.gen(function* () {
           sessionId: baseSessionId,
           baseSessionId: baseSessionId,
           turnId: ulid(),
+          ccOptions,
         },
       });
 
@@ -193,11 +195,14 @@ const LayerImpl = Effect.gen(function* () {
         );
         const messageIter = await Runtime.runPromise(runtime)(
           Effect.gen(function* () {
+            // 兜底:SDK 库默认 permissionMode 是 "default",会触发权限弹窗中断续跑。
+            // 上游未显式设置时,统一走 bypassPermissions(CCV agent 场景本就假设授权)。
+            const effectivePermissionMode =
+              task.def.ccOptions?.permissionMode ?? "bypassPermissions";
             const permissionOptions = yield* permissionService.createCanUseToolRelatedOptions({
               turnId: task.def.turnId,
               projectId: sessionProcess.def.projectId,
-              permissionMode:
-                task.def.type !== "continue" ? task.def.ccOptions?.permissionMode : undefined,
+              permissionMode: effectivePermissionMode,
               sessionId: task.def.type === "new" ? task.def.sessionId : task.def.baseSessionId,
             });
 
@@ -208,7 +213,7 @@ const LayerImpl = Effect.gen(function* () {
             });
 
             const baseOptions = {
-              ...(task.def.type === "continue" ? {} : task.def.ccOptions),
+              ...task.def.ccOptions,
               ...permissionOptions,
               cwd: sessionProcess.def.cwd,
               abortController: sessionProcess.def.abortController,

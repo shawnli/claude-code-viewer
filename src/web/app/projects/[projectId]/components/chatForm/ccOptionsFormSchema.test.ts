@@ -14,7 +14,7 @@ describe("ccOptionsFormSchema", () => {
       const result = getDefaultCCOptions();
       expect(result).toEqual({
         settingSources: ["user", "project", "local"],
-        permissionMode: "default",
+        permissionMode: "bypassPermissions",
         systemPrompt: {
           type: "preset",
           preset: "claude_code",
