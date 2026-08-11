@@ -25,5 +25,10 @@ export const activateLocale = async (locale: SupportedLocale) => {
     loadedLocales.push(locale);
   }
 
-  i18n.activate(locale);
+  // BCP-47 归一化:lingui 内部的 i18n.date/number/plural 都会把 _locales 传给
+  // Intl.*Format;活跃 locale 是 POSIX "zh_CN" 时会触发 RangeError: Invalid language tag。
+  // 传入第二参 locales(BCP-47 数组)让 helper 用它,同时保持 i18n.locale 仍是 "zh_CN"
+  // 以兼容 SupportedLocale 等值判断。
+  const bcp47 = locale.replace("_", "-");
+  i18n.activate(locale, [bcp47]);
 };
