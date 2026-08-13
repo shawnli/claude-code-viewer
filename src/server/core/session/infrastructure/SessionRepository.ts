@@ -1,5 +1,5 @@
 import { FileSystem } from "@effect/platform";
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { Cause, Context, Effect, Layer, Option } from "effect";
 import { DrizzleService } from "../../../lib/db/DrizzleService.ts";
 import { projects, sessions } from "../../../lib/db/schema.ts";
@@ -208,14 +208,29 @@ const LayerImpl = Effect.gen(function* () {
         return yield* Effect.fail(new Error("Invalid project path: outside allowed directory"));
       }
 
-      // Ensure project is synced in DB
-      const projectExists = db
-        .select({ one: sql<number>`1` })
+      // Ensure project is synced in DB.
+      // fs.watch(recursive:true) on Linux is known to miss events under load, so we can't
+      // rely on the file watcher alone. Cheap defense: compare the projects dir's current
+      // mtime with what we stored on the last sync — if the dir has changed since (a file
+      // was added or removed), re-run syncProjectList. This makes getSessions self-healing
+      // for missed-watch cases at negligible cost (one fs.stat per API call).
+      const projectRow = db
+        .select({ dirMtimeMs: projects.dirMtimeMs })
         .from(projects)
         .where(eq(projects.id, projectId))
         .get();
-      if (!projectExists) {
+      if (projectRow === undefined) {
         yield* syncService.syncProjectList(projectId).pipe(Effect.catchAll(() => Effect.void));
+      } else {
+        const currentStat = yield* fs
+          .stat(claudeProjectPath)
+          .pipe(Effect.catchAll(() => Effect.succeed(null)));
+        if (currentStat !== null) {
+          const currentMtimeMs = Option.getOrElse(currentStat.mtime, () => new Date(0)).getTime();
+          if (currentMtimeMs > projectRow.dirMtimeMs) {
+            yield* syncService.syncProjectList(projectId).pipe(Effect.catchAll(() => Effect.void));
+          }
+        }
       }
 
       // Fetch all sessions for project ordered by lastModifiedAt DESC

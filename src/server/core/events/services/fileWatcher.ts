@@ -2,6 +2,7 @@ import { FileSystem, Path } from "@effect/platform";
 import { Context, Effect, Fiber, Layer, Ref, Stream } from "effect";
 import { ApplicationContext } from "../../platform/services/ApplicationContext.ts";
 import { encodeProjectIdFromSessionFilePath } from "../../project/functions/id.ts";
+import { SyncService } from "../../sync/services/SyncService.ts";
 import { parseSessionFilePath } from "../functions/parseSessionFilePath.ts";
 import { EventBus } from "./EventBus.ts";
 
@@ -20,6 +21,7 @@ export class FileWatcherService extends Context.Tag("FileWatcherService")<
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
       const eventBus = yield* EventBus;
+      const syncService = yield* SyncService;
       const context = yield* ApplicationContext;
 
       const isWatchingRef = yield* Ref.make(false);
@@ -58,16 +60,20 @@ export class FileWatcherService extends Context.Tag("FileWatcherService")<
                 }),
               );
             } else {
+              // 先把这条 session 同步进 DB,再通知客户端 invalidate。
+              // 反过来会让客户端 refetch 到未同步的旧列表(浏览器缓存和后端 DB 都是旧的),
+              // 于是新会话/删除的会话都不出现,ctrl+shift+r 也白搭。
+              const { projectId, sessionId } = payload;
               Effect.runFork(
-                eventBus.emit("sessionChanged", {
-                  projectId: payload.projectId,
-                  sessionId: payload.sessionId,
-                }),
-              );
-              Effect.runFork(
-                eventBus.emit("sessionListChanged", {
-                  projectId: payload.projectId,
-                }),
+                syncService.syncSession(projectId, sessionId).pipe(
+                  Effect.catchAll((e) =>
+                    Effect.logError(
+                      `[fileWatcher] syncSession ${projectId}/${sessionId} failed: ${String(e)}`,
+                    ),
+                  ),
+                  Effect.andThen(eventBus.emit("sessionChanged", { projectId, sessionId })),
+                  Effect.andThen(eventBus.emit("sessionListChanged", { projectId })),
+                ),
               );
             }
 

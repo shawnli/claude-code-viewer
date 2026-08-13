@@ -13,6 +13,7 @@ import {
 } from "../../server/core/platform/services/CcvOptionsService";
 import { EnvService } from "../../server/core/platform/services/EnvService";
 import { UserConfigService } from "../../server/core/platform/services/UserConfigService";
+import { SyncService } from "../../server/core/sync/services/SyncService";
 import type { UserConfig } from "../../server/lib/config/config";
 
 const claudeDirForTest = `${process.cwd()}/mock-global-claude-dir`;
@@ -88,10 +89,17 @@ export const testPlatformLayer = (overrides?: {
       }),
   });
 
+  const syncServiceLayer = Layer.mock(SyncService, {
+    syncSession: () => Effect.void,
+    syncProjectList: () => Effect.void,
+    fullSync: () => Effect.void,
+  });
+
   return Layer.mergeAll(
     applicationContextLayer,
     userConfigServiceLayer,
     EventBus.Live,
+    syncServiceLayer,
     ccvOptionsServiceLayer,
     envServiceLayer,
     Path.layer,
